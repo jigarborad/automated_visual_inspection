@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Defect Detector</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #f0f0f0; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            flex-direction: column; 
+        }
+        .container { 
+            background-color: #fff; 
+            padding: 30px; 
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); 
+            border-radius: 10px; 
+            text-align: center; 
+        }
+        h1 { 
+            margin-bottom: 20px; 
+        }
+        input[type="file"] { 
+            display: none; 
+        }
+        .custom-file-upload {
+            border: 1px solid #ccc;
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .custom-file-upload:hover {
+            background-color: #0056b3;
+        }
+        button { 
+            padding: 6px 12px;
+            font-size: 16px; 
+            border: none; 
+            border-radius: 5px; 
+            background-color: #28a745; 
+            color: white; 
+            cursor: pointer; 
+        }
+        button:hover { 
+            background-color: #218838; 
+        }
+        #result { 
+            margin-top: 20px; 
+            font-size: 18px; 
+        }
+        #image-preview {
+            margin-top: 20px;
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload an Image to Detect Defects</h1>
+        <label class="custom-file-upload">
+            <input type="file" id="upload" accept="image/*" />
+            Choose File
+        </label>
+        <button onclick="uploadImage()">Upload</button>
+        <div id="result"></div>
+        <img id="image-preview" src="" alt="Image Preview">
+    </div>
+    <script>
+        document.getElementById('upload').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('image-preview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        async function uploadImage() {
+            const upload = document.getElementById('upload');
+            const file = upload.files[0];
+            if (!file) {
+                alert('Please choose a file first.');
+                return;
+            }
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            document.getElementById('result').innerText = 'Defect Type: ' + result.defect_type;
+        }
+    </script>
+</body>
+</html>
